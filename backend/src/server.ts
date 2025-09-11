@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import { generateToken, findUserByEmail, addUser, userExists } from './auth';
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const ITEMS = Array.from({ length: 100 }, (_, i) => ({
     id: String(i + 1),
@@ -56,6 +58,58 @@ app.get('/api/items/search', (req, res) => {
             hasPrev: page > 1
         }
     });
+});
+
+// Login endpoint
+app.post('/api/auth/login', (req, res) => {
+  const { email } = req.body;
+  
+  const user = findUserByEmail(email);
+  
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  const token = generateToken(user.id);
+  
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  });
+});
+
+// Register endpoint
+app.post('/api/auth/register', (req, res) => {
+  const { email, name } = req.body;
+  
+  // Check if email and name are provided
+  if (!email || !name) {
+    return res.status(400).json({ error: 'Email and name are required' });
+  }
+  
+  // Check if user already exists
+  if (userExists(email)) {
+    return res.status(400).json({ error: 'User already exists' });
+  }
+  
+  // Add new user
+  const newUser = addUser(email, name);
+  
+  // Generate token
+  const token = generateToken(newUser.id);
+  
+  res.status(201).json({
+    token,
+    user: {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name
+    }
+  });
 });
 
 app.listen(3000, () => {
