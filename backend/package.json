@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node-dev src/server.ts",
+    "dev": "ts-node-dev src/server.ts",
+    "debug": "ts-node-dev --inspect src/server.ts",
+    "debug-brk": "ts-node-dev --inspect-brk src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
