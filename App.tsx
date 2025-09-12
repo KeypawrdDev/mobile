@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { View, Text } from 'react-native';
 import { FeedScreen } from './src/screens/feed_screen';
 import { AccountScreen } from './src/screens/account_screen';
-// Add this import for NativeWind
-import './nativewind-env.d.ts';
+// Import the CSS file instead of the .d.ts file
+import './global.css';
 
 const Tab = createBottomTabNavigator();
 const qc = new QueryClient();

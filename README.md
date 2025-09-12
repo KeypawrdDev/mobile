@@ -12,7 +12,7 @@ A React Native mobile application with tab navigation, featuring a Feed screen a
 ```bash
 # Install dependencies
 npm install
-cd backend && npm install && cd ..
+cd backend && npm install
 
 # Start development servers
 # Terminal 1 - Backend
@@ -102,7 +102,7 @@ Replace page-based pagination with `useInfiniteQuery` for automatic loading.
 
 ### Additional Features
 - **Security**: Environment variables, rate limiting
-- **Performance**: Redis caching, code splitting
+- **Performance**: Redis caching
 - **Monitoring**: Error tracking, performance monitoring
 
 ## CI/CD Pipeline
@@ -112,50 +112,89 @@ GitHub Actions pipeline that automatically tests, builds, and deploys both mobil
 
 ### Main Workflow
 ```yaml
+# Workflow name that appears in GitHub Actions
 name: CI/CD Pipeline
-on:
+
+# When to trigger this workflow
+on: 
+  # Trigger on pushes to main or develop branches
   push:
     branches: [main, develop]
+  # Trigger on pull requests targeting main branch
   pull_request:
     branches: [main]
 
+# Define the jobs to run
 jobs:
+  # Frontend continuous integration job
   frontend-ci:
+    # Run on Ubuntu Linux virtual machine
     runs-on: ubuntu-latest
     steps:
+      # Download the source code from GitHub repository
       - uses: actions/checkout@v4
+      # Install Node.js runtime environment
       - uses: actions/setup-node@v4
+      # Install project dependencies (faster than npm install)
       - run: npm ci
+      # Check TypeScript code for errors without generating files
       - run: npx tsc --noEmit
+      # Run frontend test suite
       - run: npm test
+      # Build web version of the app for deployment
       - run: npx expo export --platform web
 
+  # Backend continuous integration job
   backend-ci:
+    # Run on Ubuntu Linux virtual machine
     runs-on: ubuntu-latest
     steps:
+      # Download the source code from GitHub repository
       - uses: actions/checkout@v4
+      # Install Node.js runtime environment
       - uses: actions/setup-node@v4
+      # Install backend dependencies in backend folder
       - run: cd backend && npm ci
+      # Run backend test suite
       - run: cd backend && npm test
+      # Build Docker container image for backend
       - run: docker build -t backend ./backend
 
+  # Mobile app build job
   mobile-build:
+    # Run on macOS (required for iOS builds)
     runs-on: macos-latest
+    # Wait for frontend-ci job to complete successfully first
     needs: [frontend-ci]
     steps:
+      # Download the source code from GitHub repository
       - uses: actions/checkout@v4
+      # Install Expo CLI globally for building mobile apps
       - run: npm install -g @expo/cli
+      # Build iOS app using Expo Application Services
       - run: eas build --platform ios --non-interactive
+      # Build Android app using Expo Application Services
       - run: eas build --platform android --non-interactive
 
+  # Backend deployment job
   backend-deploy:
+    # Run on Ubuntu Linux virtual machine
     runs-on: ubuntu-latest
+    # Wait for backend-ci job to complete successfully first
     needs: [backend-ci]
+    # Only run if pushing to main branch (production deployment)
     if: github.ref == 'refs/heads/main'
     steps:
+      # Placeholder step for actual deployment commands
       - name: Deploy to Production
         run: echo "Deploy backend to production"
 ```
+
+**Key Points:**
+- **Sequential flow**: frontend-ci → mobile-build, backend-ci → backend-deploy
+- **Platform-specific**: macOS for mobile builds, Ubuntu for others
+- **Conditional deployment**: Only deploys from main branch
+- **Quality gates**: TypeScript check and tests before builds
 
 ### Required Secrets
 - `EXPO_TOKEN` - Expo authentication
