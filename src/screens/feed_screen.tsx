@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { fetchItems, PaginationInfo } from './client';
+import { fetchItems, PaginationInfo } from '../api/client';
 
 export function FeedScreen() {
   const [q, setQ] = useState('');
