@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { fetchItems, PaginationInfo } from '../api/client';
+import { fetchItems, PaginationInfo } from '../../src/api/client';
 
-export function FeedScreen() {
+export default function FeedScreen() {
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(5); // Items per page
